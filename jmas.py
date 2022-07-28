@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
 from datetime import datetime
-from rpi_ws281x import PixelStrip, Color
 import json
 import os
 import requests
@@ -12,13 +11,19 @@ import time
 from const import JMA_AREA, JMA_ICON_BASEURL, JMA_COLORS, JMA_JSON_BASEURL, JMA_TELOPS
 
 
-LED_BRIGHTNESS = 255  # Set to 0 for darkest and 255 for brightest
-LED_CHANNEL = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
-LED_COUNT = 32        # Number of LED pixels.
-LED_DMA = 10          # DMA channel to use for generating signal (try 10)
-LED_FREQ_HZ = 800000  # LED signal frequency in hertz (usually 800khz)
-LED_INVERT = False    # True to invert the signal (when using NPN transistor level shift)
-LED_PIN = 18          # GPIO pin connected to the pixels (18 uses PWM!).
+DEBUG_ON_PC = True # Raspberry Pi上ではFalseに変更
+
+
+if DEBUG_ON_PC == False:
+    from rpi_ws281x import PixelStrip, Color
+
+    LED_BRIGHTNESS = 255  # Set to 0 for darkest and 255 for brightest
+    LED_CHANNEL = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
+    LED_COUNT = 32        # Number of LED pixels.
+    LED_DMA = 10          # DMA channel to use for generating signal (try 10)
+    LED_FREQ_HZ = 800000  # LED signal frequency in hertz (usually 800khz)
+    LED_INVERT = False    # True to invert the signal (when using NPN transistor level shift)
+    LED_PIN = 18          # GPIO pin connected to the pixels (18 uses PWM!).
 
 
 # | 00 | 01 | 02 | 03 | 04 | 05 | 06 | 07 |
@@ -31,11 +36,14 @@ LED_PIN = 18          # GPIO pin connected to the pixels (18 uses PWM!).
 # | 26 | 18 | 10 | 02 |
 # ...
 # | 31 | 23 | 15 | 07 |
-def setXYColor(x, y, color=Color(255, 255, 255)):
+def setXYColor(x, y, color):
     if 0 <= x <= 3 and 0 <= y <= 7:
         i = 8 * ( 3 - x ) + y
-        strip.setPixelColor(i, color)
-        strip.show()
+        if DEBUG_ON_PC == False:
+            strip.setPixelColor(i, color)
+            strip.show()
+        else:
+            print(i, x, y)
 
 
 def format_date(dt):
@@ -80,23 +88,29 @@ def get_pref(area_id, i):
 
                 if 'weatherCodes' in area:
                     area_name_wc = area['area']['name']
-                    print('area_name_wc', area_name_wc)
+                    print('area_name_wc', area_name_wc, i)
 
                     weather_telops = [JMA_TELOPS[n] for n in area['weatherCodes']]
                     print('weather_telops', ' '.join(weather_telops))
 
-                    weather_colors = ['({},{},{})'.format(*JMA_COLORS[n]) for n in area['weatherCodes']]
-                    print('weather_colors', ' '.join(weather_colors))
+                    weather_colors = [JMA_COLORS[n] for n in area['weatherCodes']]
+                    for j, col in enumerate(weather_colors):
+                        if DEBUG_ON_PC == False:
+                            setXYColor(j, i, Color(*col))
+                        else:
+                            print((j, i), col)
 
                 print('')
                 # end for
 
 
 if __name__ == '__main__':
-    strip = PixelStrip(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
-    strip.begin()
+    if DEBUG_ON_PC == False:
+        strip = PixelStrip(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
+        strip.begin()
     try:
         main()
 
     except KeyboardInterrupt:
-        colorWipe(strip, Color(0, 0, 0), 10)
+        if DEBUG_ON_PC == False:
+            colorWipe(strip, Color(0, 0, 0), 10)
