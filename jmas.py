@@ -11,7 +11,7 @@ import time
 from const import JMA_AREA, JMA_ICON_BASEURL, JMA_COLORS, JMA_JSON_BASEURL, JMA_TELOPS
 
 
-DEBUG_ON_PC = True # Raspberry Pi上ではFalseに変更
+DEBUG_ON_PC = False # Raspberry Pi上ではFalse、PCでのデバッグ時はTrueに変更
 
 
 if DEBUG_ON_PC == False:
@@ -107,7 +107,8 @@ def get_pref(area_id, i):
 def clear_color():
     if DEBUG_ON_PC == False:
         for c in range(LED_COUNT):
-            strip.setPixelColor(i, Color(0, 0, 0))
+            strip.setPixelColor(c, Color(0, 0, 0))
+        strip.show()
 
 
 if __name__ == '__main__':
@@ -116,7 +117,7 @@ if __name__ == '__main__':
         strip.begin()
     try:
         main()
-        time.sleep(30)
+        time.sleep(300)
         clear_color()
 
     except KeyboardInterrupt:
