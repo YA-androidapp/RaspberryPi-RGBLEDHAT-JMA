@@ -36,7 +36,7 @@ if DEBUG_ON_PC == False:
 # | 26 | 18 | 10 | 02 |
 # ...
 # | 31 | 23 | 15 | 07 |
-def setXYColor(x, y, color):
+def set_xy_color(x, y, color):
     if 0 <= x <= 3 and 0 <= y <= 7:
         i = 8 * ( 3 - x ) + y
         if DEBUG_ON_PC == False:
@@ -96,12 +96,18 @@ def get_pref(area_id, i):
                     weather_colors = [JMA_COLORS[n] for n in area['weatherCodes']]
                     for j, col in enumerate(weather_colors):
                         if DEBUG_ON_PC == False:
-                            setXYColor(j, i, Color(*col))
+                            set_xy_color(j, i, Color(*col))
                         else:
                             print((j, i), col)
 
                 print('')
                 # end for
+
+
+def clear_color():
+    if DEBUG_ON_PC == False:
+        for c in range(LED_COUNT):
+            strip.setPixelColor(i, Color(0, 0, 0))
 
 
 if __name__ == '__main__':
@@ -110,8 +116,8 @@ if __name__ == '__main__':
         strip.begin()
     try:
         main()
+        time.sleep(30)
+        clear_color()
 
     except KeyboardInterrupt:
-        if DEBUG_ON_PC == False:
-            for c in range(LED_COUNT):
-                strip.setPixelColor(i, Color(0, 0, 0))
+        clear_color()
