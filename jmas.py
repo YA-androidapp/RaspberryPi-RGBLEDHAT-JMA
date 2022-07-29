@@ -113,4 +113,5 @@ if __name__ == '__main__':
 
     except KeyboardInterrupt:
         if DEBUG_ON_PC == False:
-            colorWipe(strip, Color(0, 0, 0), 10)
+            for c in range(LED_COUNT):
+                strip.setPixelColor(i, Color(0, 0, 0))
